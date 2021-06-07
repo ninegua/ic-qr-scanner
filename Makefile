@@ -1,10 +1,10 @@
-SRC=src/index.js src/bare-agent.js src/index.html src/simple.min.css
+SRC=src/index.js src/bare-agent.js src/index.html
 
 all: fmt build
 
 build: dist/main.bundle.js
 
-dist/index.html dist/main.bundle.js &: $(SRC) node_modules webpack.config.js
+dist/index.html dist/main.bundle.js &: $(SRC) node_modules webpack.config.js src/simple.min.css
 	npm run-script build
 
 node_modules: package.json
@@ -16,8 +16,10 @@ fmt:
 dist/monic.wasm: dist/index.html
 	cd dist && ../monic.sh index.html
 
-release: dist/monic.wasm
-	@which dfx 2> /dev/null || echo "dfx is not found! Make sure dfx is in PATH, and type 'cd dist && dfx deploy --network=ic'"
+dist/canister_ids.json: canister_ids.json
+	cd dist && ln -s ../canister_ids.json .
+
+release: dist/monic.wasm dist/canister_ids.json
 	cd dist && dfx deploy --network=ic
 
 .PHONY: all fmt build release
