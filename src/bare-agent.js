@@ -142,33 +142,49 @@ async function verify_certificate(state, path) {
 }
 
 export async function send_message(message, update_status, sleep) {
-  if (message.call_type == "query") {
-    let reply = await query(fromHexString(message.content));
-    update_status(reply);
-  } else if (message.call_type == "update") {
-    let reply = await call(fromHexString(message.content));
-    update_status(reply);
-  } else if (message.ingress && message.request_status) {
-    // special input from nano
-    await call(fromHexString(message.ingress.content));
-    const request_status = message.request_status;
-    const request_id = fromHexString(request_status.request_id);
-    const canister_id = Principal.fromText(request_status.canister_id);
-    while (true) {
-      let reply = await read_state(
-        canister_id,
-        request_id,
-        fromHexString(request_status.content)
-      );
+  try {
+    if (message.call_type == "query") {
+      let reply = await query(fromHexString(message.content));
       update_status(reply);
-      if (reply.status && reply.status != "replied") {
-        sleep();
-        continue;
+    } else {
+      // Update call, handle json format of both nano and dfx
+      const ingress_content = message.ingress
+        ? message.ingress.content
+        : message.content;
+      await call(fromHexString(ingress_content));
+      console.log("Message sent");
+      let status_content;
+      let request_id;
+      let canister_id;
+      if (message.request_status) {
+        status_content = message.request_status.content;
+        if (!status_content) throw "Missing request_status field";
+        request_id = message.request_status.request_id;
+        canister_id = message.request_status.canister_id;
       } else {
-        break;
+        status_content = message.signed_request_status;
+        if (!status_content) throw "Missing signed_request_status field";
+        request_id = message.request_id;
+        canister_id = message.canister_id;
+      }
+      if (!request_id) throw "Missing request_id field";
+      if (!canister_id) throw "Missing canister_id field";
+      while (true) {
+        let reply = await read_state(
+          Principal.fromText(canister_id),
+          fromHexString(request_id),
+          fromHexString(status_content)
+        );
+        update_status(reply);
+        if (reply.status && reply.status != "replied") {
+          sleep();
+          continue;
+        } else {
+          break;
+        }
       }
     }
-  } else {
-    update_status("Error: Unsupported request type or content");
+  } catch (err) {
+    update_status("Unsupported message format:\n" + JSON.stringify(err));
   }
 }

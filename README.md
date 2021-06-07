@@ -10,7 +10,7 @@ This app has been deployed on the IC at https://p5deo-6aaaa-aaaab-aaaxq-cai.raw.
 Features:
 - [x] Send both query and update calls produced by `dfx`.
 - [x] Send update calls with request status produced by [nano].
-- [ ] Support request status after `dfx` gains the ability to produce it offline.
+- [x] Support request status for `dfx` >= 0.7.1.
 - [ ] Support [Add to Home screen] from mobile browser.
 - [ ] Pick a better default camera (micro-lens) by default, or let user choose.
 

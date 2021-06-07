@@ -10,7 +10,7 @@ dist/index.html dist/main.bundle.js &: $(SRC) node_modules webpack.config.js src
 node_modules: package.json
 	npm install
 
-fmt:
+fmt: $(SRC) webpack.config.js
 	prettier -w $(SRC) webpack.config.js
 
 dist/monic.wasm: dist/index.html
