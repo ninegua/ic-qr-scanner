@@ -24,7 +24,7 @@ Acknowledgement:
 * CSS is from [Simple.css].
 
 [zbar.wasm]: https://github.com/samsam2310/zbar.wasm
-[monic]: https://p5deo-6aaaa-aaaab-aaaxq-cai.raw.ic0.app
+[monic]: https://ffgig-jyaaa-aaaae-aaaoa-cai.raw.ic0.app
 [nano]: https://github.com/dfinity-lab/nano
 [DFINITY SDK]: https://sdk.dfinity.org
 [Add to Home screen]: https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Add_to_home_screen
