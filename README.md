@@ -19,16 +19,17 @@ Note:
 * Blurry image does not work, but you can always enlarge the QR code displayed on your AG computer to help with the scanning.
 
 Acknowledgement:
-* Single page deployment on IC is with the minimalistic tool [monic].
+* Single page deployment on IC using the minimalistic tool [monic], courtesy of [blynn].
 * QR scanning is from [zbar.wasm].
 * CSS is from [Simple.css].
 
-[zbar.wasm]: https://github.com/samsam2310/zbar.wasm
-[monic]: https://ffgig-jyaaa-aaaae-aaaoa-cai.raw.ic0.app
-[nano]: https://github.com/dfinity-lab/nano
 [DFINITY SDK]: https://sdk.dfinity.org
+[nano]: https://github.com/dfinity-lab/nano
 [Add to Home screen]: https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Add_to_home_screen
+[zbar.wasm]: https://github.com/samsam2310/zbar.wasm
 [Simple.css]: https://simplecss.org
+[monic]: https://fmfd2-7qaaa-aaaae-aaapq-cai.raw.ic0.app
+[blynn]: https://crypto.stanford.edu/~blynn
 
 To learn more about developing apps on the Internet Computer, see the following documentation available online:
 
