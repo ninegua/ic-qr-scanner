@@ -15,8 +15,11 @@ Features:
 - [ ] Support request status with `dfx` (a feature that `dfx` is missing at the moment).
 - [ ] Support [Add to Home screen] from mobile browser.
 
-Note that messages has to fit in the QR-Code size limit, which is about 4000 characters after `gzip -c|base64`.
+Notes:
+* A message has to fit in the QR-Code size limit, which is about 4000 characters after `gzip -c|base64`.
+* QR scanning code is from [zbar.wasm]. Make sure your QR picture is large & clear to have a good scan!
 
+[zbar.wasm]: https://github.com/samsam2310/zbar.wasm
 [monic]: https://p5deo-6aaaa-aaaab-aaaxq-cai.raw.ic0.app
 [nano]: https://github.com/dfinity-lab/nano
 [DFINITY SDK]: https://sdk.dfinity.org
