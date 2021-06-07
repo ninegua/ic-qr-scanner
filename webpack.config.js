@@ -3,8 +3,8 @@ const webpack = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const InlineChunkHtmlPlugin = require("inline-chunk-html-plugin");
-const HTMLInlineCSSWebpackPlugin =
-  require("html-inline-css-webpack-plugin").default;
+const HTMLInlineCSSWebpackPlugin = require("html-inline-css-webpack-plugin")
+  .default;
 
 module.exports = {
   mode: "development",
