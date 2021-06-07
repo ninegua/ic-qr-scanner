@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <style>
+      #scan,
+      #send,
+      #video {
+        margin: 0 auto;
+        display: block;
+        max-height: 400px;
+      }
+      #canvas {
+        position: absolute;
+        margin: 0 auto;
+        background-color: rgba(0, 0, 0, 0.46);
+        z-index: 2;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+      }
+      #video_box {
+        position: relative;
+      }
+    </style>
+  </head>
+  <body>
+    <header><h1><%= htmlWebpackPlugin.options.myPageHeader %></h1></header>
+    <main>
+      <div id="video_box">
+        <canvas id="canvas"></canvas>
+        <video id="video"></video>
+      </div>
+      <br />
+      <button id="scan" type="button">Scan</button>
+      <div id="result"></div>
+    </main>
+    <footer>Source</footer>
+  </body>
+</html>

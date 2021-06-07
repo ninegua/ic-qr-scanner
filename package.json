@@ -1,0 +1,28 @@
+{
+  "name": "dfx-sender",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "build": "webpack"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@dfinity/agent": "^0.9.0",
+    "@dfinity/candid": "^0.9.0",
+    "@dfinity/principal": "^0.9.0",
+    "css-loader": "^5.2.6",
+    "html-inline-css-webpack-plugin": "^1.11.0",
+    "html-webpack-plugin": "^5.3.1",
+    "inline-chunk-html-plugin": "^1.1.1",
+    "mini-css-extract-plugin": "^1.6.0",
+    "pako": "^2.0.3",
+    "style-loader": "^2.0.0",
+    "zbar.wasm": "^2.0.3"
+  },
+  "devDependencies": {
+    "webpack": "5.24.4",
+    "webpack-cli": "4.5.0"
+  }
+}
