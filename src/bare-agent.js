@@ -8,6 +8,8 @@ import {
 } from "@dfinity/agent";
 import { IDL, blobFromText } from "@dfinity/candid";
 import { Principal } from "@dfinity/principal";
+import ledger_did from "./ledger.did";
+import governance_did from "./governance.did";
 
 function fromHexString(hexString) {
   return new Uint8Array(
@@ -15,11 +17,9 @@ function fromHexString(hexString) {
   );
 }
 
-async function query(content) {
-  const ingress = Cbor.decode(content);
-  const canister_id = new Principal(ingress.content.canister_id);
+async function query(canister_id, content) {
   let response = await fetch(
-    "https://ic0.app/api/v2/canister/" + canister_id.toString() + "/query",
+    "https://ic0.app/api/v2/canister/" + canister_id + "/query",
     {
       method: "POST",
       headers: {
@@ -35,19 +35,14 @@ async function query(content) {
   } else {
     let blob = await response.blob();
     let data = await blob.arrayBuffer();
-    console.log(data);
     let reply = Cbor.decode(Buffer.from(data));
-    console.log(reply);
-    //console.log(IDL.decode([IDL.Nat], reply.reply.arg));
     return reply;
   }
 }
 
-async function call(content) {
-  const ingress = Cbor.decode(content);
-  const canister_id = new Principal(ingress.content.canister_id);
+async function call(canister_id, content) {
   let response = await fetch(
-    "https://ic0.app/api/v2/canister/" + canister_id.toString() + "/call",
+    "https://ic0.app/api/v2/canister/" + canister_id + "/call",
     {
       method: "POST",
       headers: {
@@ -66,7 +61,7 @@ async function call(content) {
 
 async function read_state(canister_id, request_id, content) {
   let response = await fetch(
-    "https://ic0.app/api/v2/canister/" + canister_id.toString() + "/read_state",
+    "https://ic0.app/api/v2/canister/" + canister_id + "/read_state",
     {
       method: "POST",
       headers: {
@@ -81,9 +76,7 @@ async function read_state(canister_id, request_id, content) {
   } else {
     let blob = await response.blob();
     let data = await blob.arrayBuffer();
-    console.log(data);
     let result = Cbor.decode(Buffer.from(data));
-    console.log(result);
     let path = [blobFromText("request_status"), request_id];
     let reply = await verify_certificate(result, path);
     return reply;
@@ -105,12 +98,13 @@ async function verify_certificate(state, path) {
   } else {
     request_status = maybeBuf.toString();
   }
-  console.log(request_status);
   switch (request_status) {
     case RequestStatusResponseStatus.Replied: {
       return {
         status: request_status,
-        reply: cert.lookup([...path, blobFromText("reply")]),
+        reply: {
+          arg: cert.lookup([...path, blobFromText("reply")]),
+        },
       };
     }
     case RequestStatusResponseStatus.Received:
@@ -144,42 +138,50 @@ async function verify_certificate(state, path) {
 export async function send_message(message, update_status, sleep) {
   try {
     if (message.call_type == "query") {
-      let reply = await query(fromHexString(message.content));
-      update_status(reply);
+      let ingress_content = fromHexString(message.content);
+      let ingress = Cbor.decode(ingress_content);
+      let canister_id = new Principal(ingress.content.canister_id).toString();
+      let method_name = ingress.content.method_name;
+      let reply = await query(canister_id, ingress_content);
+      update_status(await try_decode(canister_id, method_name, reply));
     } else {
       // Update call, handle json format of both nano and dfx
-      const ingress_content = message.ingress
-        ? message.ingress.content
-        : message.content;
-      await call(fromHexString(ingress_content));
-      console.log("Message sent");
+      const ingress_content = fromHexString(
+        message.ingress ? message.ingress.content : message.content
+      );
+      let ingress = Cbor.decode(ingress_content);
+      let canister_id = new Principal(ingress.content.canister_id).toString();
+      let method_name = ingress.content.method_name;
+      await call(canister_id, ingress_content);
       let status_content;
       let request_id;
-      let canister_id;
       if (message.request_status) {
         status_content = message.request_status.content;
         if (!status_content) throw "Missing request_status field";
         request_id = message.request_status.request_id;
-        canister_id = message.request_status.canister_id;
       } else {
         status_content = message.signed_request_status;
         if (!status_content) throw "Missing signed_request_status field";
         request_id = message.request_id;
-        canister_id = message.canister_id;
       }
       if (!request_id) throw "Missing request_id field";
       if (!canister_id) throw "Missing canister_id field";
       while (true) {
         let reply = await read_state(
-          Principal.fromText(canister_id),
+          canister_id,
           fromHexString(request_id),
           fromHexString(status_content)
         );
-        update_status(reply);
         if (reply.status && reply.status != "replied") {
+          update_status(reply);
           sleep();
           continue;
         } else {
+          if (reply.status == "replied") {
+            update_status(await try_decode(canister_id, method_name, reply));
+          } else {
+            update_status(reply);
+          }
           break;
         }
       }
@@ -187,4 +189,55 @@ export async function send_message(message, update_status, sleep) {
   } catch (err) {
     update_status("Unsupported message format:\n" + JSON.stringify(err));
   }
+}
+
+const canister_did_files = {
+  "ryjl3-tyaaa-aaaaa-aaaba-cai": ledger_did,
+  "rrkah-fqaaa-aaaaa-aaaaq-cai": governance_did,
+};
+
+function lookup(dict, name) {
+  for (var i = 0; i < dict.length; i++) {
+    if (dict[i][0] == name) return dict[i][1];
+  }
+}
+
+const CANDID_UI_CANISTER_ID = "a4gq6-oaaaa-aaaab-qaa4q-cai";
+
+// Try to decode reply using known did files
+async function try_decode(canister_id, method_name, reply) {
+  try {
+    let did = canister_did_files[canister_id];
+    if (did) {
+      let result = await agent.query(CANDID_UI_CANISTER_ID, {
+        methodName: "did_to_js",
+        arg: IDL.encode([IDL.Text], [did]),
+      });
+      switch (result.status) {
+        case "rejected":
+          throw "query call rejected";
+        case "replied": {
+          let arg = IDL.decode(
+            [IDL.Opt(IDL.Text)],
+            Buffer.from(result.reply.arg)
+          );
+          if (arg.length > 0) {
+            let js = arg[0];
+            let dataUri =
+              "data:text/javascript;charset=utf-8," + encodeURIComponent(js);
+            let mod = await eval('import("' + dataUri + '")');
+            let services = mod.default({ IDL });
+            let func = lookup(services._fields, method_name);
+            if (func) {
+              reply.reply = IDL.decode(
+                func.retTypes,
+                Buffer.from(reply.reply.arg)
+              );
+            }
+          }
+        }
+      }
+    }
+  } catch (err) {}
+  return reply;
 }

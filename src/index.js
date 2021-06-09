@@ -3,6 +3,7 @@ import * as pako from "pako";
 import { HttpAgent, Cbor } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 import { send_message } from "./bare-agent.js";
+import { stringify } from "bigint-json-native";
 
 const data = {
   version: 1,
@@ -34,15 +35,6 @@ function fromHexString(hexString) {
   );
 }
 
-//console.log(Cbor.decode(fromHexString(data.content)));
-
-/*
-agent.query(data.canister_id, { arg: fromHexString(data.content), methodName: data.method_name }).then(response => {
-	console.log(response)
-}).catch(err => {
-	console.log(err)
-});
-*/
 import { scanImageData } from "zbar.wasm";
 const SCAN_PROID_MS = 800;
 
@@ -119,16 +111,12 @@ async function scan() {
   ctx.drawImage(video, 0, 0, width, height);
   const imgData = ctx.getImageData(0, 0, width, height);
   const res = await scanImageData(imgData);
-  //console.log(res, Date.now());
   if (res.length > 0) {
-    console.log(res, Date.now());
     try {
       const encoded = String.fromCharCode.apply(null, res[0].data);
       const gzipped = await decode_base64(encoded);
       const unzipped = pako.inflate(gzipped, { to: "string" });
-      console.log(unzipped);
       const message = JSON.parse(unzipped);
-      console.log(message);
       render(res, width, height);
       prepare_send(message);
     } catch (err) {
@@ -155,7 +143,6 @@ function prepare_send(message) {
   document.getElementById("video").pause();
   const content = message.ingress ? message.ingress.content : message.content;
   const ingress = Cbor.decode(fromHexString(content));
-  console.log(ingress);
   const text =
     "Request type : " +
     ingress.content.request_type +
@@ -186,10 +173,8 @@ function do_send(message) {
     const result = document.getElementById("result");
     const pre = document.createElement("pre");
     const update_status = (reply) => {
-      if (typeof reply != "string") {
-        reply = JSON.stringify(reply);
-      }
-      pre.innerText = reply;
+      let text = typeof reply == "string" ? reply : stringify(reply, null, 2);
+      pre.innerText = text;
     };
     pre.id = "status";
     result.appendChild(pre);

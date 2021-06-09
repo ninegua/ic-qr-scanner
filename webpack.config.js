@@ -43,6 +43,10 @@ module.exports = {
         test: /\.bin$/,
         type: "asset/inline",
       },
+      {
+        test: /\.did$/,
+        use: "raw-loader",
+      },
     ],
   },
   optimization: {

@@ -12,6 +12,7 @@
     "@dfinity/agent": "^0.9.0",
     "@dfinity/candid": "^0.9.0",
     "@dfinity/principal": "^0.9.0",
+    "bigint-json-native": "^0.4.2",
     "css-loader": "^5.2.6",
     "html-inline-css-webpack-plugin": "^1.11.0",
     "html-webpack-plugin": "^5.3.1",
@@ -22,6 +23,7 @@
     "zbar.wasm": "^2.0.3"
   },
   "devDependencies": {
+    "raw-loader": "^4.0.2",
     "webpack": "5.24.4",
     "webpack-cli": "4.5.0"
   }
