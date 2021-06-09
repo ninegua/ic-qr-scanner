@@ -3,7 +3,7 @@ name: "release"
 on:
   push:
     branches:
-        - "master"
+      - "master"
 
 jobs:
   release:
@@ -16,7 +16,7 @@ jobs:
         nix_path: nixpkgs=channel:nixos-21.05
     - run: make nix-build
     - uses: skx/github-action-publish-binaries@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: '*.wasm'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: '*.wasm'
