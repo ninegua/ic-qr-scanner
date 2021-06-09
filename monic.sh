@@ -1,8 +1,5 @@
-#! /usr/bin/env nix-shell
-#! nix-shell -i bash -p xxd lld_10 pkgsCross.wasi32.buildPackages.clang_10
-
+#! /usr/bin/env bash
 # This tool is taken from https://p5deo-6aaaa-aaaab-aaaxq-cai.raw.ic0.app/.
-# Only modification is the above nix-shell header.
 
 set -e
 function mkC() {

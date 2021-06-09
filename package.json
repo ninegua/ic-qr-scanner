@@ -1,30 +1,30 @@
 {
-  "name": "dfx-sender",
-  "version": "1.0.0",
-  "description": "",
+  "name": "ic-qr-scanner",
+  "version": "0.1.0",
+  "description": "IC Transaction Scanner",
   "private": true,
   "scripts": {
     "build": "webpack"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Paul H. Liu <paul@thev.net>",
+  "license": "MIT",
   "dependencies": {
     "@dfinity/agent": "^0.9.0",
     "@dfinity/candid": "^0.9.0",
     "@dfinity/principal": "^0.9.0",
     "bigint-json-native": "^0.4.2",
+    "pako": "^2.0.3",
+    "zbar.wasm": "^2.0.3"
+  },
+  "devDependencies": {
     "css-loader": "^5.2.6",
     "html-inline-css-webpack-plugin": "^1.11.0",
     "html-webpack-plugin": "^5.3.1",
     "inline-chunk-html-plugin": "^1.1.1",
     "mini-css-extract-plugin": "^1.6.0",
-    "pako": "^2.0.3",
-    "style-loader": "^2.0.0",
-    "zbar.wasm": "^2.0.3"
-  },
-  "devDependencies": {
     "raw-loader": "^4.0.2",
-    "webpack": "5.24.4",
+    "style-loader": "^2.0.0",
+    "webpack": "^5.24.4",
     "webpack-cli": "4.5.0"
   }
 }
