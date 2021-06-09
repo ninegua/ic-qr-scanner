@@ -11,7 +11,7 @@ Features:
 - [x] Send both query and update calls produced by `dfx`.
 - [x] Send update calls with request status produced by [nano].
 - [x] Support request status for `dfx` >= 0.7.1.
-- [ ] Decode message send result.
+- [x] Decode message send result (partial support)
 - [ ] Support [Add to Home screen] from mobile browser.
 - [ ] Pick a better default camera (micro-lens) by default, or let user choose.
 
