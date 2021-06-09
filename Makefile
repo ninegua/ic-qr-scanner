@@ -9,17 +9,15 @@ build: dist/main.bundle.js
 $(DID_SRC) &:
 	cd src && cat $(NNS_IFACES) |tar zx --wildcards --strip-components=1 */ledger.did */governance.did
 
-dist/index.html dist/main.bundle.js &: $(SRC) $(DID_SRC) node_modules webpack.config.js src/simple.min.css
+dist/index.html dist/main.bundle.js &: $(SRC) $(DID_SRC) webpack.config.js src/simple.min.css
 	npm run-script build
-
-node_modules: package.json
-	npm install
 
 fmt: $(SRC) webpack.config.js
 	prettier -w $(SRC) webpack.config.js
 
 dist/monic.wasm: dist/index.html
 	cd dist && sh ../monic.sh index.html
+	sha256sum dist/index.html dist/monic.wasm
 
 dist/canister_ids.json: canister_ids.json
 	cd dist && ln -s ../canister_ids.json .

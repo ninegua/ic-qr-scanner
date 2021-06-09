@@ -51,5 +51,8 @@ module.exports = {
   },
   optimization: {
     minimize: true,
+    moduleIds: "natural",
+    chunkIds: "natural",
+    realContentHash: true,
   },
 };
