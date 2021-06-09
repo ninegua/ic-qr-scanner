@@ -16,6 +16,10 @@ Features:
 - [ ] Support [Add to Home screen] from mobile browser.
 - [ ] Pick a better default camera (micro-lens) by default, or let user choose.
 
+Note:
+* A message has to fit in the QR-Code size limit, which is about 4000 characters after `gzip -c|base64`.
+* Blurry image does not work, but you can always enlarge the QR code displayed on your AG computer to help with the scanning.
+
 Reproducible build:
 
 You can verify the build by comparing hashes from 3 sources, github release, local build, and the deployed canister (`dfx` command needs to run from a directory that has a valid `dfx.json`):
@@ -27,14 +31,10 @@ $ curl -Ls https://github.com/ninegua/ic-qr-scanner/releases/download/v0.1.2/ic-
 $ cat $(nix-build ic-qr-scanner.nix 2>/dev/null)/bin/ic-qr-scanner.wasm |sha256sum
 219bbc3b462aae58904938667e1d2350deebda5301f5f24b50b100ab1bd7933a  -
 
-$ dfx canister --no-wallet --network ic info $(cat canister_ids.json|jq -r .monic.ic)
+$ dfx canister --no-wallet --network ic info p5deo-6aaaa-aaaab-aaaxq-cai
 Controller: ihamg-4yaaa-aaaab-aaafa-cai
 Module hash: 0x219bbc3b462aae58904938667e1d2350deebda5301f5f24b50b100ab1bd7933a
 ```
-
-Note:
-* A message has to fit in the QR-Code size limit, which is about 4000 characters after `gzip -c|base64`.
-* Blurry image does not work, but you can always enlarge the QR code displayed on your AG computer to help with the scanning.
 
 Acknowledgement:
 * Single page deployment on IC using the minimalistic tool [monic], courtesy of [blynn].
