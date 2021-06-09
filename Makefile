@@ -33,4 +33,7 @@ install: dist/monic.wasm
 clean:
 	rm -rf dist $(DID_SRC)
 
-.PHONY: all fmt build release install clean
+nix-build:
+	cp `nix-build ic-qr-scanner.nix`/bin/* .
+
+.PHONY: all fmt build release install clean nix-build
