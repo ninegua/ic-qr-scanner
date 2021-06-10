@@ -1,13 +1,13 @@
 SRC=src/index.js src/bare-agent.js src/index.html
 DID_SRC=src/ledger.did src/governance.did
-NNS_IFACES ?= $(shell nix-prefetch-url --print-path https://codeload.github.com/dfinity/nns-ifaces/tar.gz/refs/tags/v0.8.1 | tail -n1)
+#NNS_IFACES ?= $(shell nix-prefetch-url --print-path https://codeload.github.com/dfinity/nns-ifaces/tar.gz/refs/tags/v0.8.1 | tail -n1)
 
 all: fmt build
 
 build: dist/main.bundle.js
 
-$(DID_SRC) &:
-	cd src && cat $(NNS_IFACES) |tar zx --wildcards --strip-components=1 */ledger.did */governance.did
+#$(DID_SRC) &:
+#	cd src && cat $(NNS_IFACES) |tar zx --wildcards --strip-components=1 */ledger.did */governance.did
 
 dist/index.html dist/main.bundle.js &: $(SRC) $(DID_SRC) webpack.config.js src/simple.min.css
 	npm run-script build
@@ -29,7 +29,7 @@ install: dist/monic.wasm
 	install -D dist/monic.wasm ${out}/bin/ic-qr-scanner.wasm
 
 clean:
-	rm -rf dist $(DID_SRC)
+	rm -rf dist
 
 nix-build:
 	cp `nix-build ic-qr-scanner.nix`/bin/* .

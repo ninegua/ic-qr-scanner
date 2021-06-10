@@ -8,11 +8,13 @@
 }) { } }:
 with pkgs;
 let
+  /*
   nns-ifaces = builtins.fetchurl {
     url =
       "https://github.com/dfinity/nns-ifaces/archive/d18437c46c180f26e09f97eb764cf65165563517.tar.gz";
     sha256 = "08pry53rbwrfjphsxji9h5jjlk8k1qwfrwl1vna3709vl9z68z4i";
   };
+  */
   filter = name: type:
     let baseName = baseNameOf (toString name);
     in !(baseName == "dist" || baseName == "node_modules"
@@ -33,7 +35,7 @@ in stdenv.mkDerivation {
     lld_10
     pkgsCross.wasi32.buildPackages.clang_10
   ];
-  NNS_IFACES = nns-ifaces;
+  /* NNS_IFACES = nns-ifaces; */
   src = cleanSource ./.;
   buildPhase = ''
     ln -s ${nodeDependencies}/lib/node_modules ./node_modules
