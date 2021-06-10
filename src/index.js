@@ -2,8 +2,8 @@ import "./simple.min.css";
 import * as pako from "pako";
 import { HttpAgent, Cbor } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
-import { send_message } from "./bare-agent.js";
 import { stringify } from "bigint-json-native";
+import { send_message } from "./bare-agent.js";
 
 const data = {
   version: 1,

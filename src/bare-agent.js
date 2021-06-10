@@ -11,6 +11,12 @@ import { Principal } from "@dfinity/principal";
 import ledger_did from "./ledger.did";
 import governance_did from "./governance.did";
 
+/*
+import fs from "fs";
+const ledger_did = await fs.readFileSync('./src/ledger.did');
+const governance_did = await fs.readFileSync("./src/governance.did", "utf-8");
+*/
+
 function fromHexString(hexString) {
   return new Uint8Array(
     (hexString.match(/.{1,2}/g) ?? []).map((byte) => parseInt(byte, 16))
@@ -224,7 +230,8 @@ async function try_decode(canister_id, method_name, reply) {
           if (arg.length > 0) {
             let js = arg[0];
             let dataUri =
-              "data:text/javascript;charset=utf-8," + encodeURIComponent(js);
+              "data:text/javascript;base64," +
+              Buffer.from(js.toString()).toString("base64");
             let mod = await eval('import("' + dataUri + '")');
             let services = mod.default({ IDL });
             let func = lookup(services._fields, method_name);
