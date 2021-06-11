@@ -39,7 +39,7 @@ release: result dfx.json
 	dfx deploy --network=ic
 
 clean:
-	rm -rf dist
+	rm -rf dist result dfx.json .dfx
 
 nix-build:
 	cp `nix-build ic-qr-scanner.nix`/bin/* .

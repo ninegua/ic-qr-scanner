@@ -51,6 +51,8 @@ async function init() {
     audio: false,
     video: { facingMode: "environment" },
   });
+  const scan_button = document.getElementById("scan");
+  scan_button.onclick = toggle_input;
   const video = document.getElementById("video");
   video.srcObject = mediaStream;
   video.setAttribute("playsinline", "");
@@ -91,16 +93,21 @@ function render(symbols, image_width, image_height) {
   }
 }
 
+function clear_result() {
+  const result = document.getElementById("result");
+  while (result.firstChild) {
+    result.removeChild(result.lastChild);
+  }
+}
+
+var input_type = "video";
 var scan_paused = false;
 async function scan() {
   if (scan_paused) {
     return;
   }
   // Remove existing scanned results if any
-  const result = document.getElementById("result");
-  while (result.firstChild) {
-    result.removeChild(result.lastChild);
-  }
+  clear_result();
   const image = document.createElement("canvas");
   const video = document.getElementById("video");
   const width = video.videoWidth;
@@ -125,24 +132,33 @@ async function scan() {
   }
 }
 
-function resume_scan() {
-  const canvas = document.getElementById("canvas");
-  const context = canvas.getContext("2d");
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  document.getElementById("video").play();
-  const scan_button = document.getElementById("scan");
-  scan_button.disabled = true;
-  scan_paused = false;
-}
-
 function prepare_send(message) {
   scan_paused = true;
-  const scan_button = document.getElementById("scan");
-  scan_button.disabled = false;
-  scan_button.onclick = resume_scan;
-  document.getElementById("video").pause();
+  if (input_type == "video") {
+    const scan_button = document.getElementById("scan");
+    scan_button.innerText = "Again";
+    scan_button.onclick = resume_scan;
+    document.getElementById("video").pause();
+  }
+  const result = document.getElementById("result");
+  let pre;
+  if (result.firstChild) {
+    pre = result.firstChild;
+  } else {
+    pre = document.createElement("pre");
+    pre.id = "message_display";
+    result.appendChild(pre);
+  }
   const content = message.ingress ? message.ingress.content : message.content;
+  if (!content) {
+    pre.innerText = "Unsupported message format";
+    return;
+  }
   const ingress = Cbor.decode(fromHexString(content));
+  if (!ingress || !ingress.content) {
+    pre.innerText = "Unsupported message format";
+    return;
+  }
   const text =
     "Request type : " +
     ingress.content.request_type +
@@ -154,12 +170,12 @@ function prepare_send(message) {
     ingress.content.method_name +
     "\nArguments    : " +
     JSON.stringify(ingress.content.arg);
-  const result = document.getElementById("result");
-  const pre = document.createElement("pre");
   pre.innerText = text;
-  result.appendChild(pre);
-  const button = document.createElement("button");
-  button.id = "send";
+  var button = document.getElementById("send");
+  if (!button) {
+    button = document.createElement("button");
+    button.id = "send";
+  }
   button.innerHTML = "Send";
   button.onclick = do_send(message);
   result.appendChild(button);
@@ -184,6 +200,57 @@ function do_send(message) {
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
+}
+
+function toggle_input(e) {
+  const video_box = document.getElementById("video_box");
+  const text_box = document.getElementById("text_box");
+  const message_area = document.getElementById("message");
+  const scan_button = document.getElementById("scan");
+  if (input_type == "video") {
+    document.getElementById("video").pause();
+    input_type = "text";
+    scan_button.innerText = "Switch to video";
+    video_box.hidden = true;
+    text_box.hidden = false;
+    message_area.value = "";
+    message_area.oninput = prepare_text;
+  } else {
+    document.getElementById("video").play();
+    input_type = "video";
+    scan_button.innerText = "Switch to text";
+    video_box.hidden = false;
+    text_box.hidden = true;
+  }
+  clear_result();
+}
+
+function prepare_text() {
+  message = document.getElementById("message");
+  try {
+    let value = JSON.parse(message.value);
+    if (typeof value == "object") {
+      prepare_send(value);
+    }
+  } catch (err) {
+    clear_result();
+  }
+}
+
+function resume_scan() {
+  scan_paused = false;
+  const scan_button = document.getElementById("scan");
+  scan_button.onclick = toggle_input;
+  if (input_type == "video") {
+    const canvas = document.getElementById("canvas");
+    const context = canvas.getContext("2d");
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    document.getElementById("video").play();
+    scan_button.innerText = "Switch to text";
+  } else {
+    document.getElementById("message").value = "";
+    scan_button.innerText = "Switch to video";
+  }
 }
 
 async function main() {
