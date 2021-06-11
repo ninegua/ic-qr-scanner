@@ -22,18 +22,18 @@ Note:
 
 Reproducible build:
 
-You can verify the build by comparing hashes from 3 sources, github release, local build, and the deployed canister (`dfx` command needs to run from a directory that has a valid `dfx.json`):
+You can verify the build by comparing hashes from 3 sources, github release, local build, and the deployed canister:
 
 ```
-$ curl -Ls https://github.com/ninegua/ic-qr-scanner/releases/download/v0.1.2/ic-qr-scanner.wasm|sha256sum
-dc7a0bfaf5eb3236f0fc1f40687af46c05d2d4b11a12e6ea3314ee65d032d2b5  -
+$ curl -Ls https://github.com/ninegua/ic-qr-scanner/releases/download/v0.1.5/ic-qr-scanner.wasm|sha256sum
+57984b6203f5637eeac0d1c848fd5af372842ff118ca26d4e78e90b9a82c69a9  -
 
 $ cat $(nix-build ic-qr-scanner.nix 2>/dev/null)/bin/ic-qr-scanner.wasm |sha256sum
-dc7a0bfaf5eb3236f0fc1f40687af46c05d2d4b11a12e6ea3314ee65d032d2b5  -
+57984b6203f5637eeac0d1c848fd5af372842ff118ca26d4e78e90b9a82c69a9  -
 
-$ dfx canister --no-wallet --network ic info p5deo-6aaaa-aaaab-aaaxq-cai
+$ make dfx.json && dfx canister --no-wallet --network ic info p5deo-6aaaa-aaaab-aaaxq-cai
 Controller: ihamg-4yaaa-aaaab-aaafa-cai
-Module hash: 0xdc7a0bfaf5eb3236f0fc1f40687af46c05d2d4b11a12e6ea3314ee65d032d2b5
+Module hash: 0x57984b6203f5637eeac0d1c848fd5af372842ff118ca26d4e78e90b9a82c69a9
 ```
 
 Acknowledgement:
