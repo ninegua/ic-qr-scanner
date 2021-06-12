@@ -13,6 +13,7 @@ Features:
 - [x] Support request status for `dfx` >= 0.7.1.
 - [x] Decode message send result (partial support).
 - [x] Reproducible build.
+- [x] Switch between text input and camera video.
 - [ ] Support [Add to Home screen] from mobile browser.
 - [ ] Pick a better default camera (micro-lens) by default, or let user choose.
 
