@@ -261,10 +261,16 @@ async function main() {
       await sleep(SCAN_PROID_MS);
     }
   } catch (err) {
-    const div = document.createElement("div");
-    div.innerText = "Cannot get camera: " + err;
+    clear_result();
+    const div = document.getElementById("result");
+    const pre = document.createElement("pre");
+    result.appendChild(pre);
+    pre.innerText = "Cannot get camera: \n" + err;
     document.body.appendChild(div);
-    console.error(err);
+    toggle_input();
+    const scan_button = document.getElementById("scan");
+    scan_button.innerText = "(video disabled)";
+    scan_button.disabled = true;
   }
 }
 
