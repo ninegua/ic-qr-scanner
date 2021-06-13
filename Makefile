@@ -50,4 +50,8 @@ release: result dfx.json
 clean:
 	rm -rf dist result dfx.json .dfx
 
-.PHONY: all fmt build release install clean
+# This is used by github release workflow
+nix-build:
+	cp `nix-build ic-qr-scanner.nix`/bin/* .
+
+.PHONY: all fmt build release install clean nix-build
