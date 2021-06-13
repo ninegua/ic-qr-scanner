@@ -5,6 +5,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [
     nodejs
     gnumake
+    gperf
     nodePackages.prettier
     nodePackages.node2nix
     pkgsCross.wasi32.buildPackages.clang_10

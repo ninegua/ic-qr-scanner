@@ -38,7 +38,7 @@ Module hash: 0xde6c0dfa550b39f0d8ec19c0eac488fdf9201530a61f9bbfe97554eaad0c357c
 ```
 
 Acknowledgement:
-* Single page deployment on IC using the minimalistic tool [monic], courtesy of [blynn].
+* Single page deployment on IC using the minimalistic tool [epic], courtesy of [blynn].
 * QR scanning is from [zbar.wasm].
 * CSS is from [Simple.css].
 
@@ -47,7 +47,7 @@ Acknowledgement:
 [Add to Home screen]: https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Add_to_home_screen
 [zbar.wasm]: https://github.com/samsam2310/zbar.wasm
 [Simple.css]: https://simplecss.org
-[monic]: https://fmfd2-7qaaa-aaaae-aaapq-cai.raw.ic0.app
+[epic]: https://fxa77-fiaaa-aaaae-aaana-cai.raw.ic0.app/epic
 [blynn]: https://crypto.stanford.edu/~blynn
 
 To learn more about developing apps on the Internet Computer, see the following documentation available online:

@@ -22,7 +22,7 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       inject: true,
-      title: "Scan and send transactions",
+      title: "IC QR Scanner",
       myPageHeader: "Scan & Send",
       template: "./src/index.html",
       filename: "./index.html",

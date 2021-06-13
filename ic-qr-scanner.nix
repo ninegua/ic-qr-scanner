@@ -29,6 +29,7 @@ in stdenv.mkDerivation {
   nativeBuildInputs = [
     nodejs
     gnumake
+    gperf
     nodePackages.prettier
     nodePackages.webpack
     xxd

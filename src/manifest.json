@@ -1,0 +1,15 @@
+{
+  "background_color": "white",
+  "description": "QR Scanner for Internet Computer Transactions",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "360x360",
+      "type": "image/png"
+    }
+  ],
+  "name": "IC QR Scanner",
+  "short_name": "IC QR",
+  "start_url": "/"
+}
