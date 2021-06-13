@@ -14,7 +14,7 @@ Features:
 - [x] Decode message send result (partial support).
 - [x] Reproducible build.
 - [x] Switch between text input and camera video.
-- [ ] Support [Add to Home screen] from mobile browser.
+- [x] Support [Add to Home screen] from mobile browser.
 - [ ] Pick a better default camera (micro-lens) by default, or let user choose.
 
 Note:
@@ -26,15 +26,15 @@ Reproducible build:
 You can verify the build by comparing hashes from 3 sources, github release, local build, and the deployed canister:
 
 ```
-$ curl -Ls https://github.com/ninegua/ic-qr-scanner/releases/download/v0.1.6/ic-qr-scanner.wasm|sha256sum
-de6c0dfa550b39f0d8ec19c0eac488fdf9201530a61f9bbfe97554eaad0c357c  -
+$ curl -Ls https://github.com/ninegua/ic-qr-scanner/releases/download/v0.1.7/ic-qr-scanner.wasm|sha256sum
+55507678f19d1c4e472f999efcb923f60a3e1b26a2e9f9f0cf1e2d13eb1e5f56  -
 
 $ cat $(nix-build ic-qr-scanner.nix 2>/dev/null)/bin/ic-qr-scanner.wasm |sha256sum
-de6c0dfa550b39f0d8ec19c0eac488fdf9201530a61f9bbfe97554eaad0c357c  -
+55507678f19d1c4e472f999efcb923f60a3e1b26a2e9f9f0cf1e2d13eb1e5f56  -
 
 $ make dfx.json && dfx canister --no-wallet --network ic info p5deo-6aaaa-aaaab-aaaxq-cai
 Controller: ihamg-4yaaa-aaaab-aaafa-cai
-Module hash: 0xde6c0dfa550b39f0d8ec19c0eac488fdf9201530a61f9bbfe97554eaad0c357c
+Module hash: 0x55507678f19d1c4e472f999efcb923f60a3e1b26a2e9f9f0cf1e2d13eb1e5f56
 ```
 
 Acknowledgement:
