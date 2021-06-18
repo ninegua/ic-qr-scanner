@@ -9,7 +9,7 @@ This app has been deployed on the IC at https://p5deo-6aaaa-aaaab-aaaxq-cai.raw.
 
 Features:
 - [x] Send both query and update calls produced by `dfx`.
-- [x] Send update calls with request status produced by [nano].
+- [x] Send update calls with request status produced by [quill].
 - [x] Support request status for `dfx` >= 0.7.1.
 - [x] Decode message send result (partial support).
 - [x] Reproducible build.
@@ -20,6 +20,7 @@ Features:
 Note:
 * A message has to fit in the QR-Code size limit, which is about 4000 characters after `gzip -c|base64`.
 * Blurry image does not work, but you can always enlarge the QR code displayed on your AG computer to help with the scanning.
+* The JSON output from [quill] may be a list of messages, you can extract them one by one using `jq` to produce multiple QR codes.
 
 Reproducible build:
 
@@ -43,7 +44,7 @@ Acknowledgement:
 * CSS is from [Simple.css].
 
 [DFINITY SDK]: https://sdk.dfinity.org
-[nano]: https://github.com/dfinity-lab/nano
+[quill]: https://github.com/dfinity/quill
 [Add to Home screen]: https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Add_to_home_screen
 [zbar.wasm]: https://github.com/samsam2310/zbar.wasm
 [Simple.css]: https://simplecss.org
