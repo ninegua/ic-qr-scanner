@@ -235,12 +235,10 @@ async function try_decode(canister_id, method_name, reply) {
             let mod = await eval('import("' + dataUri + '")');
             let services = mod.default({ IDL });
             let func = lookup(services._fields, method_name);
-            if (func) {
-              reply.reply = IDL.decode(
-                func.retTypes,
-                Buffer.from(reply.reply.arg)
-              );
-            }
+            reply = IDL.decode(func.retTypes, Buffer.from(reply.reply.arg));
+            reply = func.retTypes
+              .map((t, i) => t.valueToString(reply[i]))
+              .toString();
           }
         }
       }
