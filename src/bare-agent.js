@@ -1,6 +1,7 @@
 import {
   RequestStatusResponseStatus,
   HttpAgent,
+  Actor,
   Cbor,
   Certificate,
   requestIdOf,
@@ -8,14 +9,6 @@ import {
 } from "@dfinity/agent";
 import { IDL, blobFromText } from "@dfinity/candid";
 import { Principal } from "@dfinity/principal";
-import ledger_did from "./ledger.did";
-import governance_did from "./governance.did";
-
-/*
-import fs from "fs";
-const ledger_did = await fs.readFileSync('./src/ledger.did');
-const governance_did = await fs.readFileSync("./src/governance.did", "utf-8");
-*/
 
 function fromHexString(hexString) {
   return new Uint8Array(
@@ -200,11 +193,6 @@ export async function send_message(message, update_status, sleep) {
   }
 }
 
-const canister_did_files = {
-  "ryjl3-tyaaa-aaaaa-aaaba-cai": ledger_did,
-  "rrkah-fqaaa-aaaaa-aaaaq-cai": governance_did,
-};
-
 function lookup(dict, name) {
   for (var i = 0; i < dict.length; i++) {
     if (dict[i][0] == name) return dict[i][1];
@@ -212,11 +200,56 @@ function lookup(dict, name) {
 }
 
 const CANDID_UI_CANISTER_ID = "a4gq6-oaaaa-aaaab-qaa4q-cai";
+const CANLISTA_CANISTER_ID = "kyhgh-oyaaa-aaaae-qaaha-cai";
+
+const getCandidHack_interface = ({ IDL }) =>
+  IDL.Service({
+    __get_candid_interface_tmp_hack: IDL.Func([], [IDL.Text], ["query"]),
+  });
+
+const getCandid_interface = ({ IDL }) =>
+  IDL.Service({
+    getCandid: IDL.Func(
+      [IDL.Principal],
+      [
+        IDL.Variant({
+          ok: IDL.Text,
+          err: IDL.Variant({ noCandidFound: IDL.null }),
+        }),
+      ],
+      ["query"]
+    ),
+  });
 
 // Try to decode reply using known did files
 async function try_decode(canister_id, method_name, reply) {
   try {
-    let did = canister_did_files[canister_id];
+    var did;
+    // Try fetch i using __get_candid_interface_tmp_hack.
+    try {
+      did = await Actor.createActor(getCandidHack_interface, {
+        agent,
+        canisterId: canister_id,
+      }).__get_candid_interface_tmp_hack();
+    } catch (e) {
+      console.log(e);
+    }
+    if (!did) {
+      // Try fetch i from canlista kyhgh-oyaaa-aaaae-qaaha-cai
+      try {
+        did = await Actor.createActor(getCandid_interface, {
+          agent,
+          canisterId: CANLISTA_CANISTER_ID,
+        }).getCandid(Principal.fromText(canister_id));
+      } catch (e) {
+        console.log(e);
+      }
+      if (did.ok) {
+        did = did.ok;
+      } else {
+        did = null;
+      }
+    }
     if (did) {
       let result = await agent.query(CANDID_UI_CANISTER_ID, {
         methodName: "did_to_js",
@@ -246,6 +279,8 @@ async function try_decode(canister_id, method_name, reply) {
         }
       }
     }
-  } catch (err) {}
+  } catch (err) {
+    console.log(err);
+  }
   return reply;
 }

@@ -1,19 +1,14 @@
 SRC=src/index.js src/bare-agent.js src/index.html
-DID_SRC=src/ledger.did src/governance.did
 NIX_SRC=default.nix ic-qr-scanner.nix node-env.nix node-packages.nix shell.nix
 NPM_SRC=webpack.config.js src/simple.min.css
 OTHER_SRC=src/manifest.json src/favicon.ico src/logo.png
-ALL_SRC=$(SRC) $(DID_SRC) $(NIX_SRC) $(NPM_SRC) $(OTHER_SRC)
+ALL_SRC=$(SRC) $(NIX_SRC) $(NPM_SRC) $(OTHER_SRC)
 
 all: fmt build
 
 build: dist/main.bundle.js
 
-#NNS_IFACES ?= $(shell nix-prefetch-url --print-path https://codeload.github.com/dfinity/nns-ifaces/tar.gz/refs/tags/v0.8.1 | tail -n1)
-#$(DID_SRC) &:
-#	cd src && cat $(NNS_IFACES) |tar zx --wildcards --strip-components=1 */ledger.did */governance.did
-
-dist/index.html dist/main.bundle.js &: $(SRC) $(DID_SRC) $(NPM_SRC)
+dist/index.html dist/main.bundle.js &: $(SRC) $(NPM_SRC)
 	npm run-script build
 
 fmt: $(SRC) webpack.config.js
