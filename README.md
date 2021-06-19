@@ -11,7 +11,7 @@ Features:
 - [x] Send both query and update calls produced by `dfx`.
 - [x] Send update calls with request status produced by [quill].
 - [x] Support request status for `dfx` >= 0.7.1.
-- [x] Decode message send result (partial support).
+- [x] Decode message send result in [Candid] format.
 - [x] Reproducible build.
 - [x] Switch between text input and camera video.
 - [x] Support [Add to Home screen] from mobile browser.
@@ -27,15 +27,15 @@ Reproducible build:
 You can verify the build by comparing hashes from 3 sources, github release, local build, and the deployed canister:
 
 ```
-$ curl -Ls https://github.com/ninegua/ic-qr-scanner/releases/download/v0.1.7/ic-qr-scanner.wasm|sha256sum
-55507678f19d1c4e472f999efcb923f60a3e1b26a2e9f9f0cf1e2d13eb1e5f56  -
+$ curl -Ls https://github.com/ninegua/ic-qr-scanner/releases/download/v0.1.8/ic-qr-scanner.wasm|sha256sum
+be91a5bb8bcf77d9dd0aaac7412dab420af60072884bcb3d0a6bd757dab5a03e  -
 
 $ cat $(nix-build ic-qr-scanner.nix 2>/dev/null)/bin/ic-qr-scanner.wasm |sha256sum
-55507678f19d1c4e472f999efcb923f60a3e1b26a2e9f9f0cf1e2d13eb1e5f56  -
+be91a5bb8bcf77d9dd0aaac7412dab420af60072884bcb3d0a6bd757dab5a03e  -
 
 $ make dfx.json && dfx canister --no-wallet --network ic info p5deo-6aaaa-aaaab-aaaxq-cai
 Controller: ihamg-4yaaa-aaaab-aaafa-cai
-Module hash: 0x55507678f19d1c4e472f999efcb923f60a3e1b26a2e9f9f0cf1e2d13eb1e5f56
+Module hash: 0xbe91a5bb8bcf77d9dd0aaac7412dab420af60072884bcb3d0a6bd757dab5a03e
 ```
 
 Acknowledgement:
@@ -50,6 +50,7 @@ Acknowledgement:
 [Simple.css]: https://simplecss.org
 [epic]: https://fxa77-fiaaa-aaaae-aaana-cai.raw.ic0.app/epic
 [blynn]: https://crypto.stanford.edu/~blynn
+[Candid]: https://github.com/dfinity/candid
 
 To learn more about developing apps on the Internet Computer, see the following documentation available online:
 
