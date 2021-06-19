@@ -193,6 +193,10 @@ function do_send(message) {
       pre.innerText = text;
     };
     pre.id = "status";
+    pre.onclick = () => {
+      pre.select();
+      document.execCommand("copy");
+    };
     result.appendChild(pre);
     await send_message(message, update_status, sleep);
   };
