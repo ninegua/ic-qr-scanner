@@ -149,7 +149,7 @@ export async function send_message(message, update_status, sleep) {
       let canister_id = new Principal(ingress.content.canister_id).toString();
       let method_name = ingress.content.method_name;
       let reply = await query(canister_id, ingress_content);
-      update_status(await try_decode(canister_id, method_name, reply));
+      update_status(await try_decode(canister_id, method_name, reply), true);
     } else {
       // Update call, handle json format of both nano and dfx
       const ingress_content = fromHexString(
@@ -184,9 +184,12 @@ export async function send_message(message, update_status, sleep) {
           continue;
         } else {
           if (reply.status == "replied") {
-            update_status(await try_decode(canister_id, method_name, reply));
+            update_status(
+              await try_decode(canister_id, method_name, reply),
+              true
+            );
           } else {
-            update_status(reply);
+            update_status(reply, true);
           }
           break;
         }

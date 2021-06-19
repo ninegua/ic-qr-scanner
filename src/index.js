@@ -188,16 +188,30 @@ function do_send(message) {
     send_button.innerHTML = "Sent";
     const result = document.getElementById("result");
     const pre = document.createElement("pre");
-    const update_status = (reply) => {
+    pre.id = "status";
+    const copy_button = document.createElement("button");
+    copy_button.id = "copy";
+    copy_button.innerHTML = "Copy";
+    copy_button.style.display = "none";
+    copy_button.onclick = () => {
+      const txt = document.createElement("textarea");
+      txt.value = pre.innerText;
+      txt.setAttribute("readonly", "");
+      txt.style = { position: "absolute", left: "-9999px" };
+      result.appendChild(txt);
+      txt.select();
+      document.execCommand("copy");
+      result.removeChild(txt);
+    };
+    result.appendChild(pre);
+    result.appendChild(copy_button);
+    const update_status = (reply, replied) => {
+      if (replied) {
+        copy_button.style.display = "block";
+      }
       let text = typeof reply == "string" ? reply : stringify(reply, null, 2);
       pre.innerText = text;
     };
-    pre.id = "status";
-    pre.onclick = () => {
-      pre.select();
-      document.execCommand("copy");
-    };
-    result.appendChild(pre);
     await send_message(message, update_status, sleep);
   };
 }
