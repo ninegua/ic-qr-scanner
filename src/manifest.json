@@ -2,6 +2,7 @@
   "background_color": "white",
   "description": "QR Scanner for Internet Computer Transactions",
   "display": "standalone",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/logo.png",
