@@ -244,7 +244,7 @@ function toggle_input(e) {
 }
 
 function prepare_text() {
-  message = document.getElementById("message");
+  const message = document.getElementById("message");
   try {
     let value = JSON.parse(message.value);
     if (typeof value == "object") {
@@ -280,11 +280,6 @@ async function main() {
     }
   } catch (err) {
     clear_result();
-    const div = document.getElementById("result");
-    const pre = document.createElement("pre");
-    result.appendChild(pre);
-    pre.innerText = "Cannot get camera: \n" + err;
-    document.body.appendChild(div);
     toggle_input();
     const scan_button = document.getElementById("scan");
     scan_button.innerText = "(video disabled)";
