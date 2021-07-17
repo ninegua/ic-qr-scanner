@@ -213,7 +213,7 @@ const getCandid_interface = ({ IDL }) =>
       [IDL.Principal],
       [
         IDL.Variant({
-          ok: IDL.Text,
+          ok: IDL.Record({ did: IDL.Text, approvedByController: IDL.Bool }),
           err: IDL.Variant({ noCandidFound: IDL.null }),
         }),
       ],
@@ -245,7 +245,7 @@ async function try_decode(canister_id, method_name, reply) {
         console.log(e);
       }
       if (did.ok) {
-        did = did.ok;
+        did = did.ok.did;
       } else {
         did = null;
       }
