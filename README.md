@@ -27,7 +27,7 @@ Reproducible build:
 You can verify the build by comparing hashes from 3 sources, github release, local build, and the deployed canister:
 
 ```
-$ curl -Ls https://github.com/ninegua/ic-qr-scanner/releases/download/v0.1.10/ic-qr-scanner.wasm|sha256sum
+$ curl -Ls https://github.com/ninegua/ic-qr-scanner/releases/download/v0.1.11/ic-qr-scanner.wasm|sha256sum
 476e4c0d7fe155faebdd3eb434e7248ff4bb47abfebc2e4125a967a3f90dd22c  -
 
 $ cat $(nix-build ic-qr-scanner.nix 2>/dev/null)/bin/ic-qr-scanner.wasm |sha256sum
