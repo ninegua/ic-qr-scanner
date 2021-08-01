@@ -123,16 +123,18 @@ async function scan() {
       const encoded = String.fromCharCode.apply(null, res[0].data);
       const gzipped = await decode_base64(encoded);
       const unzipped = pako.inflate(gzipped, { to: "string" });
-      const message = JSON.parse(unzipped);
+      const value = JSON.parse(unzipped);
       render(res, width, height);
-      prepare_send(message);
+      let messages = value instanceof Array ? value : [value];
+      prepare_send(messages, 0);
     } catch (err) {
       console.log(err);
     }
   }
 }
 
-function prepare_send(message) {
+function prepare_send(messages, i) {
+  if (i >= messages.length) return;
   scan_paused = true;
   if (input_type == "video") {
     const scan_button = document.getElementById("scan");
@@ -141,14 +143,14 @@ function prepare_send(message) {
     document.getElementById("video").pause();
   }
   const result = document.getElementById("result");
-  let pre;
-  if (result.firstChild) {
-    pre = result.firstChild;
-  } else {
+  let id = `message_display_${i}`;
+  let pre = document.getElementById(id);
+  if (!pre) {
     pre = document.createElement("pre");
-    pre.id = "message_display";
+    pre.id = id;
     result.appendChild(pre);
   }
+  let message = messages[i];
   const content = message.ingress ? message.ingress.content : message.content;
   if (!content) {
     pre.innerText = "Unsupported message format";
@@ -176,16 +178,20 @@ function prepare_send(message) {
     button = document.createElement("button");
     button.id = "send";
   }
-  button.innerHTML = "Send";
-  button.onclick = do_send(message);
+  button.innerHTML =
+    "Send" + (messages.length > 1 ? ` (${i + 1}/${messages.length})` : "");
+  button.onclick = do_send(messages, i);
   result.appendChild(button);
 }
 
-function do_send(message) {
+function do_send(messages, i) {
   return async () => {
-    const send_button = document.getElementById("send");
-    send_button.disabled = true;
-    send_button.innerHTML = "Sent";
+    if (i + 1 >= messages.length) {
+      const send_button = document.getElementById("send");
+      send_button.disabled = true;
+      send_button.innerHTML =
+        "Sent" + (messages.length > 1 ? ` (${i + 1}/${messages.length})` : "");
+    }
     const result = document.getElementById("result");
     const pre = document.createElement("pre");
     pre.id = "status";
@@ -212,7 +218,8 @@ function do_send(message) {
       let text = typeof reply == "string" ? reply : stringify(reply, null, 2);
       pre.innerText = text;
     };
-    await send_message(message, update_status, sleep);
+    await send_message(messages[i], update_status, sleep);
+    prepare_send(messages, i + 1);
   };
 }
 
@@ -248,7 +255,7 @@ function prepare_text() {
   try {
     let value = JSON.parse(message.value);
     if (typeof value == "object") {
-      prepare_send(value);
+      prepare_send(value, 0);
     }
   } catch (err) {
     clear_result();
