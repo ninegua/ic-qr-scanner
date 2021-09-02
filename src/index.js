@@ -3,7 +3,7 @@ import * as pako from "pako";
 import { HttpAgent, Cbor } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 import { stringify } from "bigint-json-native";
-import { send_message } from "./bare-agent.js";
+import { send_message, try_decode } from "./bare-agent.js";
 
 const data = {
   version: 1,
@@ -125,14 +125,14 @@ async function scan() {
       const unzipped = pako.inflate(gzipped, { to: "string" });
       const message = JSON.parse(unzipped);
       render(res, width, height);
-      prepare_send(message);
+      await prepare_send(message);
     } catch (err) {
       console.log(err);
     }
   }
 }
 
-function prepare_send(message) {
+async function prepare_send(message) {
   scan_paused = true;
   if (input_type == "video") {
     const scan_button = document.getElementById("scan");
@@ -159,17 +159,18 @@ function prepare_send(message) {
     pre.innerText = "Unsupported message format";
     return;
   }
+  const canister_id = new Principal(ingress.content.canister_id);
+  const args = await try_decode(canister_id, ingress.content.method_name, ingress.content.arg, false);
   const text =
     "Request type : " +
     ingress.content.request_type +
     "\nSender       : " +
     new Principal(ingress.content.sender).toString() +
-    "\nCanister id  : " +
-    new Principal(ingress.content.canister_id).toString() +
+    "\nCanister id  : " + canister_id.toString() +
     "\nMethod name  : " +
     ingress.content.method_name +
     "\nArguments    : " +
-    JSON.stringify(ingress.content.arg);
+    JSON.stringify(args, (_, v) => typeof v === 'bigint' ? `${v}n` : v);
   pre.innerText = text;
   var button = document.getElementById("send");
   if (!button) {

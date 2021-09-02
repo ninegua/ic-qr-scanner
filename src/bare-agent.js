@@ -142,7 +142,7 @@ export async function send_message(message, update_status, sleep) {
       let canister_id = new Principal(ingress.content.canister_id).toString();
       let method_name = ingress.content.method_name;
       let reply = await query(canister_id, ingress_content);
-      update_status(await try_decode(canister_id, method_name, reply), true);
+      update_status(await try_decode(canister_id, method_name, reply.reply.arg, true), true);
     } else {
       // Update call, handle json format of both nano and dfx
       const ingress_content = fromHexString(
@@ -178,7 +178,7 @@ export async function send_message(message, update_status, sleep) {
         } else {
           if (reply.status == "replied") {
             update_status(
-              await try_decode(canister_id, method_name, reply),
+              await try_decode(canister_id, method_name, reply.reply.arg, true),
               true
             );
           } else {
@@ -222,7 +222,7 @@ const getCandid_interface = ({ IDL }) =>
   });
 
 // Try to decode reply using known did files
-async function try_decode(canister_id, method_name, reply) {
+export async function try_decode(canister_id, method_name, msg, isReply) {
   try {
     var did;
     // Try fetch i using __get_candid_interface_tmp_hack.
@@ -271,9 +271,13 @@ async function try_decode(canister_id, method_name, reply) {
             let mod = await eval('import("' + dataUri + '")');
             let services = mod.idlFactory({ IDL });
             let func = lookup(services._fields, method_name);
-            reply = IDL.decode(func.retTypes, Buffer.from(reply.reply.arg));
-            reply = func.retTypes
-              .map((t, i) => t.valueToString(reply[i]))
+            let funcTypes = func.retTypes;
+            if (!isReply) {
+              funcTypes = func.argTypes;
+            }
+            msg = IDL.decode(funcTypes, Buffer.from(msg));
+            msg = funcTypes
+              .map((t, i) => t.valueToString(msg[i]))
               .toString();
           }
         }
@@ -282,5 +286,5 @@ async function try_decode(canister_id, method_name, reply) {
   } catch (err) {
     console.log(err);
   }
-  return reply;
+  return msg;
 }
