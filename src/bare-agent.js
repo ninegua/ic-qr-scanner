@@ -269,7 +269,7 @@ async function try_decode(canister_id, method_name, reply) {
               "data:text/javascript;base64," +
               Buffer.from(js.toString()).toString("base64");
             let mod = await eval('import("' + dataUri + '")');
-            let services = mod.default({ IDL });
+            let services = mod.idlFactory({ IDL });
             let func = lookup(services._fields, method_name);
             reply = IDL.decode(func.retTypes, Buffer.from(reply.reply.arg));
             reply = func.retTypes
