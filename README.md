@@ -27,15 +27,15 @@ Reproducible build:
 You can verify the build by comparing hashes from 3 sources, github release, local build, and the deployed canister:
 
 ```
-$ curl -Ls https://github.com/ninegua/ic-qr-scanner/releases/download/v0.1.11/ic-qr-scanner.wasm|sha256sum
-476e4c0d7fe155faebdd3eb434e7248ff4bb47abfebc2e4125a967a3f90dd22c  -
+$ curl -Ls https://github.com/ninegua/ic-qr-scanner/releases/download/v0.1.12/ic-qr-scanner.wasm|sha256sum
+9371610517945c65def5265bdde78597159bcc55e3dea58ce3e5111212e2f010  -
 
 $ cat $(nix-build ic-qr-scanner.nix 2>/dev/null)/bin/ic-qr-scanner.wasm |sha256sum
-476e4c0d7fe155faebdd3eb434e7248ff4bb47abfebc2e4125a967a3f90dd22c  -
+9371610517945c65def5265bdde78597159bcc55e3dea58ce3e5111212e2f010  -
 
 $ make dfx.json && dfx canister --no-wallet --network ic info p5deo-6aaaa-aaaab-aaaxq-cai
 Controller: ihamg-4yaaa-aaaab-aaafa-cai
-Module hash: 0x476e4c0d7fe155faebdd3eb434e7248ff4bb47abfebc2e4125a967a3f90dd22c
+Module hash: 0x9371610517945c65def5265bdde78597159bcc55e3dea58ce3e5111212e2f010
 ```
 
 Acknowledgement:
