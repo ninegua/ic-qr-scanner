@@ -160,17 +160,23 @@ async function prepare_send(message) {
     return;
   }
   const canister_id = new Principal(ingress.content.canister_id);
-  const args = await try_decode(canister_id, ingress.content.method_name, ingress.content.arg, false);
+  const args = await try_decode(
+    canister_id,
+    ingress.content.method_name,
+    ingress.content.arg,
+    false
+  );
   const text =
     "Request type : " +
     ingress.content.request_type +
     "\nSender       : " +
     new Principal(ingress.content.sender).toString() +
-    "\nCanister id  : " + canister_id.toString() +
+    "\nCanister id  : " +
+    canister_id.toString() +
     "\nMethod name  : " +
     ingress.content.method_name +
     "\nArguments    : " +
-    JSON.stringify(args, (_, v) => typeof v === 'bigint' ? `${v}n` : v);
+    (typeof args == "string" ? args : "(" + stringify(args, null, 2) + ")");
   pre.innerText = text;
   var button = document.getElementById("send");
   if (!button) {
