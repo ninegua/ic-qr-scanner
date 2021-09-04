@@ -159,7 +159,7 @@ async function prepare_send(message) {
     pre.innerText = "Unsupported message format";
     return;
   }
-  const canister_id = new Principal(ingress.content.canister_id);
+  const canister_id = new Principal(ingress.content.canister_id).toString();
   const args = await try_decode(
     canister_id,
     ingress.content.method_name,
@@ -172,7 +172,7 @@ async function prepare_send(message) {
     "\nSender       : " +
     new Principal(ingress.content.sender).toString() +
     "\nCanister id  : " +
-    canister_id.toString() +
+    canister_id +
     "\nMethod name  : " +
     ingress.content.method_name +
     "\nArguments    : " +
