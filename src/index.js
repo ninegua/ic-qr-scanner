@@ -22,7 +22,7 @@ const data = {
 
 // convert base64 string into ArrayBuffer
 async function decode_base64(data) {
-  const encoded = "data:image/png;base64," + data;
+  const encoded = "data:application/octet-binary;base64," + data;
   const fetched = await fetch(encoded);
   const blob = await fetched.blob();
   const buffer = await blob.arrayBuffer();
@@ -279,6 +279,15 @@ function resume_scan() {
 }
 
 async function main() {
+    const params = new URLSearchParams(window.location.search);
+    const msg = params.get("msg");
+    if (msg) {
+      const gzipped = await decode_base64(msg.replace(/_/g, '/').replace(/-/g, '+'));
+      const unzipped = pako.inflate(gzipped, { to: "string" });
+      const message = JSON.parse(unzipped);
+      await prepare_send(message);
+      return;
+    }
   try {
     await init();
     while (true) {
@@ -291,6 +300,7 @@ async function main() {
     const scan_button = document.getElementById("scan");
     scan_button.innerText = "(video disabled)";
     scan_button.disabled = true;
+    throw err;
   }
 }
 
