@@ -12,6 +12,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, "./dist"),
     filename: "main.bundle.js",
+    publicPath: ""
   },
   target: "web",
   devtool: "source-map",
@@ -41,7 +42,7 @@ module.exports = {
       },
       {
         test: /\.bin$/,
-        type: "asset/inline",
+        type: "asset/resource",
       },
       {
         test: /\.did$/,

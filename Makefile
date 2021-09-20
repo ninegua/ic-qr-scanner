@@ -24,7 +24,7 @@ dist/app.did:
 	touch $@
 
 dist/app.c: dist/index.html $(OTHER_SRC)
-	echo -e "/,./dist/index.html\n/manifest.json,./src/manifest.json\n/logo.png,./src/logo.png\n/favicon.ico,./src/favicon.ico" | sh epic.sh > $@
+	echo -e "/,./release/index.html\n/test.html,./dist/index.html\n/$$(ls dist/*.bin|cut -d/ -f2),$$(ls ./dist/*.bin)\n/manifest.json,./src/manifest.json\n/logo.png,./src/logo.png\n/favicon.ico,./src/favicon.ico" | sh epic.sh > $@
 
 install: dist/app.wasm dist/app.did
 	install -D dist/app.did ${out}/bin/ic-qr-scanner.did
