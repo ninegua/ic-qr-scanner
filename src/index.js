@@ -150,7 +150,7 @@ async function scan() {
   if (res.length > 0) {
     let message = await decode_to_json(res[0].data);
     if (message.err) {
-      var [result, pre] = get_result_and_pre();
+      let [result, pre] = get_result_and_pre();
       pre.innerText = "Error decoding message: " + message.err;
     } else {
       render(res, width, height);
@@ -255,7 +255,7 @@ function do_send(message) {
       if (replied) {
         copy_button.style.display = "block";
       } else {
-        quote = (s) => "Status check:\n" + s + "\nPlease wait...";
+        quote = (s) => "Waiting for response: " + s;
       }
       let text = typeof reply == "string" ? reply : stringify(reply, null, 2);
       pre.innerText = quote(text);
@@ -322,13 +322,24 @@ function resume_scan() {
 
 async function main() {
   const params = new URLSearchParams(window.location.search);
+  function only_text() {
+    clear_result();
+    toggle_input();
+    const scan_button = document.getElementById("scan");
+    scan_button.innerText = "(video disabled)";
+    scan_button.disabled = true;
+  }
   const msg = params.get("msg");
   if (msg) {
-    const message = await decode_to_json(decodeURLComponent(msg));
-    if (message.errr) {
-      var [result, pre] = get_result_and_pre();
+    const message = await decode_to_json(decodeURIComponent(msg));
+    if (input_type == "video") {
+      only_text();
+    }
+    if (message.err) {
+      let [result, pre] = get_result_and_pre();
       pre.innerText = "Error decoding message: " + message.err;
     } else {
+      document.getElementById("message").value = stringify(message, null, 2);
       await prepare_send(message);
     }
     return;
@@ -341,12 +352,9 @@ async function main() {
     }
   } catch (err) {
     clear_result();
-    toggle_input();
-    const scan_button = document.getElementById("scan");
-    scan_button.innerText = "(video disabled)";
-    scan_button.disabled = true;
+    only_text();
     throw err;
   }
 }
 
-main();
+window.addEventListener("load", main);
