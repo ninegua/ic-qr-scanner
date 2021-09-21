@@ -15,27 +15,29 @@ Features:
 - [x] Reproducible build.
 - [x] Switch between text input and camera video.
 - [x] Support [Add to Home screen] from mobile browser.
+- [x] Allow input to be passed as a parameter `?msg=...` through URL.
+- [x] Accept input in 3 formats: JSON text, base64 encoded text, gzipped then base64 encoded text.
 - [ ] Pick a better default camera (micro-lens) by default, or let user choose.
 
 Note:
-* A message has to fit in the QR-Code size limit, which is about 4000 characters after `gzip -c|base64`.
+* A message has to fit in the QR-Code size limit, which is about 4000 characters. So doing `gzip -c|base64` is recommended.
 * Blurry image does not work, but you can always enlarge the QR code displayed on your AG computer to help with the scanning.
-* The JSON output from [quill] may be a list of messages, you can extract them one by one using `jq` to produce multiple QR codes.
+* The JSON output from [quill] may be a list of messages, you can extract them one by one using `jq` to produce multiple QR codes, or use [this script](https://github.com/IvanMalison/quill-qr/blob/master/quill-qr.sh) to help.
 
 Reproducible build:
 
 You can verify the build by comparing hashes from 3 sources, github release, local build, and the deployed canister:
 
 ```
-$ curl -Ls https://github.com/ninegua/ic-qr-scanner/releases/download/v0.1.14/ic-qr-scanner.wasm|sha256sum
-4bc0f88323412a7f33f13daebd3a76c8d19d92cd7e473c6364e12820c9aa5dcb  -
+$ curl -Ls https://github.com/ninegua/ic-qr-scanner/releases/download/v0.1.15/ic-qr-scanner.wasm|sha256sum
+a1c09286a0cd38c967ff366be35d4eee4c5094eddce7b43a7d4678f0730edde9  -
 
 $ cat $(nix-build ic-qr-scanner.nix 2>/dev/null)/bin/ic-qr-scanner.wasm |sha256sum
-4bc0f88323412a7f33f13daebd3a76c8d19d92cd7e473c6364e12820c9aa5dcb  -
+a1c09286a0cd38c967ff366be35d4eee4c5094eddce7b43a7d4678f0730edde9  -
 
 $ make dfx.json && dfx canister --no-wallet --network ic info p5deo-6aaaa-aaaab-aaaxq-cai
 Controller: ihamg-4yaaa-aaaab-aaafa-cai
-Module hash: 0x4bc0f88323412a7f33f13daebd3a76c8d19d92cd7e473c6364e12820c9aa5dcb
+Module hash: 0xa1c09286a0cd38c967ff366be35d4eee4c5094eddce7b43a7d4678f0730edde9
 ```
 
 Acknowledgement:
