@@ -12,5 +12,6 @@ stdenv.mkDerivation {
     xxd
     lld_10
     nixfmt
+    binaryen
   ];
 }

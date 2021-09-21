@@ -20,15 +20,6 @@ const data = {
     "d9d9f7a367636f6e74656e74a66c726571756573745f747970656571756572796e696e67726573735f6578706972791b1685cd5ef1accd406673656e646572581d9e7d426db28fa46d013ad4c9955074e3946ab25203eece542b098f1c026b63616e69737465725f69644a000000000020001401016b6d6574686f645f6e616d657072656d61696e696e675f6379636c657363617267464449444c00006d73656e6465725f7075626b6579582c302a300506032b6570032100702ea1af2d7dd450a2d82ec233726cd1c7473471831b1fe085921ca66710c5cc6a73656e6465725f7369675840554ca488a01da25179a004f40e07bc66b2c96d9aa46fdffe815480ccdb71df80423d8ef6b1f1031ee3fe4b2a249aafff61cfbcaccf293f9e551144923bd40308",
 };
 
-// convert base64 string into ArrayBuffer
-async function decode_base64(data) {
-  const encoded = "data:application/octet-binary;base64," + data;
-  const fetched = await fetch(encoded);
-  const blob = await fetched.blob();
-  const buffer = await blob.arrayBuffer();
-  return buffer;
-}
-
 function fromHexString(hexString) {
   return new Uint8Array(
     (hexString.match(/.{1,2}/g) ?? []).map((byte) => parseInt(byte, 16))
@@ -93,10 +84,49 @@ function render(symbols, image_width, image_height) {
   }
 }
 
-function clear_result() {
-  const result = document.getElementById("result");
-  while (result.firstChild) {
-    result.removeChild(result.lastChild);
+// Expect string or binary buffer as input
+async function decode_to_json(data) {
+  if (!(data === data + "")) {
+    // decode gzip if header matches
+    if (data.length >= 2 && data[0] == 0x1f && data[1] == 0x8b) {
+      try {
+        data = pako.inflate(data, { to: "string" });
+      } catch (err) {
+        return { err: err.toString() };
+      }
+    } else {
+      data = String.fromCharCode.apply(null, data);
+    }
+  }
+  // data is a string by now
+  try {
+    // try decode base64
+    data = atob(data);
+    // It could also have gzip header
+    if (
+      data.length >= 2 &&
+      data.charCodeAt(0) == 0x1f &&
+      data.charCodeAt(1) == 0x8b
+    ) {
+      return decode_to_json(Buffer.from(data, "binary"));
+    }
+  } catch (e) {}
+  try {
+    var json = JSON.parse(data);
+    if (Array.isArray(json)) {
+      if (json.length == 1) {
+        return json[0];
+      } else {
+        return {
+          err:
+            "Expect a single JSON object, but got an array of length " +
+            json.length,
+        };
+      }
+    }
+    return json;
+  } catch (err) {
+    return { err: err.toString() };
   }
 }
 
@@ -107,7 +137,6 @@ async function scan() {
     return;
   }
   // Remove existing scanned results if any
-  clear_result();
   const image = document.createElement("canvas");
   const video = document.getElementById("video");
   const width = video.videoWidth;
@@ -119,17 +148,34 @@ async function scan() {
   const imgData = ctx.getImageData(0, 0, width, height);
   const res = await scanImageData(imgData);
   if (res.length > 0) {
-    try {
-      const encoded = String.fromCharCode.apply(null, res[0].data);
-      const gzipped = await decode_base64(encoded);
-      const unzipped = pako.inflate(gzipped, { to: "string" });
-      const message = JSON.parse(unzipped);
+    let message = await decode_to_json(res[0].data);
+    if (message.err) {
+      var [result, pre] = get_result_and_pre();
+      pre.innerText = "Error decoding message: " + message.err;
+    } else {
       render(res, width, height);
       await prepare_send(message);
-    } catch (err) {
-      console.log(err);
     }
   }
+}
+
+function clear_result() {
+  const result = document.getElementById("result");
+  while (result.firstChild) {
+    result.removeChild(result.lastChild);
+  }
+}
+
+function get_result_and_pre() {
+  const result = document.getElementById("result");
+  let pre;
+  if (result.firstChild) {
+    pre = result.firstChild;
+  } else {
+    pre = document.createElement("pre");
+    result.appendChild(pre);
+  }
+  return [result, pre];
 }
 
 async function prepare_send(message) {
@@ -140,15 +186,7 @@ async function prepare_send(message) {
     scan_button.onclick = resume_scan;
     document.getElementById("video").pause();
   }
-  const result = document.getElementById("result");
-  let pre;
-  if (result.firstChild) {
-    pre = result.firstChild;
-  } else {
-    pre = document.createElement("pre");
-    pre.id = "message_display";
-    result.appendChild(pre);
-  }
+  var [result, pre] = get_result_and_pre();
   const content = message.ingress ? message.ingress.content : message.content;
   if (!content) {
     pre.innerText = "Unsupported message format";
@@ -213,11 +251,14 @@ function do_send(message) {
     result.appendChild(pre);
     result.appendChild(copy_button);
     const update_status = (reply, replied) => {
+      var quote = (s) => s;
       if (replied) {
         copy_button.style.display = "block";
+      } else {
+        quote = (s) => "Status check:\n" + s + "\nPlease wait...";
       }
       let text = typeof reply == "string" ? reply : stringify(reply, null, 2);
-      pre.innerText = text;
+      pre.innerText = quote(text);
     };
     await send_message(message, update_status, sleep);
   };
@@ -266,6 +307,7 @@ function resume_scan() {
   scan_paused = false;
   const scan_button = document.getElementById("scan");
   scan_button.onclick = toggle_input;
+  clear_result();
   if (input_type == "video") {
     const canvas = document.getElementById("canvas");
     const context = canvas.getContext("2d");
@@ -279,15 +321,18 @@ function resume_scan() {
 }
 
 async function main() {
-    const params = new URLSearchParams(window.location.search);
-    const msg = params.get("msg");
-    if (msg) {
-      const gzipped = await decode_base64(msg.replace(/_/g, '/').replace(/-/g, '+'));
-      const unzipped = pako.inflate(gzipped, { to: "string" });
-      const message = JSON.parse(unzipped);
+  const params = new URLSearchParams(window.location.search);
+  const msg = params.get("msg");
+  if (msg) {
+    const message = await decode_to_json(decodeURLComponent(msg));
+    if (message.errr) {
+      var [result, pre] = get_result_and_pre();
+      pre.innerText = "Error decoding message: " + message.err;
+    } else {
       await prepare_send(message);
-      return;
     }
+    return;
+  }
   try {
     await init();
     while (true) {
