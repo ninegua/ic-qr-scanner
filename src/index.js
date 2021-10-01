@@ -99,6 +99,18 @@ async function decode_to_json(data) {
     }
   }
   // data is a string by now
+  if (data.startsWith("http")) {
+    if (data.startsWith("https://p5deo-6aaaa-aaaab-aaaxq-cai")) {
+      // strip URL when it is meant for this app
+      let i = data.indexOf("/?msg=");
+      if (i > 0) {
+        return decode_to_json(decodeURIComponent(data.substring(i + 6)));
+      }
+    } else {
+      // Or return a normal URL
+      return { content: data };
+    }
+  }
   try {
     // try decode base64
     data = atob(data);
@@ -111,6 +123,7 @@ async function decode_to_json(data) {
       return decode_to_json(Buffer.from(data, "binary"));
     }
   } catch (e) {}
+  // decode JSON
   try {
     var json = JSON.parse(data);
     if (Array.isArray(json)) {
@@ -192,76 +205,93 @@ async function prepare_send(message) {
     pre.innerText = "Unsupported message format";
     return;
   }
-  const ingress = Cbor.decode(fromHexString(content));
-  if (!ingress || !ingress.content) {
-    pre.innerText = "Unsupported message format";
-    return;
+  var action = "Send";
+  // shortcut for normal URL
+  if (content == content + "" && content.startsWith("http")) {
+    pre.innerText = content;
+    action = "Go";
+  } else {
+    const ingress = Cbor.decode(fromHexString(content));
+    if (!ingress || !ingress.content) {
+      pre.innerText = "Unsupported message format";
+      return;
+    }
+    const canister_id = new Principal(ingress.content.canister_id).toString();
+    const args = await try_decode(
+      canister_id,
+      ingress.content.method_name,
+      ingress.content.arg,
+      false
+    );
+    const text =
+      "Request type : " +
+      ingress.content.request_type +
+      "\nSender       : " +
+      new Principal(ingress.content.sender).toString() +
+      "\nCanister id  : " +
+      canister_id +
+      "\nMethod name  : " +
+      ingress.content.method_name +
+      "\nArguments    : " +
+      (typeof args == "string" ? args : "(" + stringify(args, null, 2) + ")");
+    pre.innerText = text;
   }
-  const canister_id = new Principal(ingress.content.canister_id).toString();
-  const args = await try_decode(
-    canister_id,
-    ingress.content.method_name,
-    ingress.content.arg,
-    false
-  );
-  const text =
-    "Request type : " +
-    ingress.content.request_type +
-    "\nSender       : " +
-    new Principal(ingress.content.sender).toString() +
-    "\nCanister id  : " +
-    canister_id +
-    "\nMethod name  : " +
-    ingress.content.method_name +
-    "\nArguments    : " +
-    (typeof args == "string" ? args : "(" + stringify(args, null, 2) + ")");
-  pre.innerText = text;
   var button = document.getElementById("send");
   if (!button) {
     button = document.createElement("button");
     button.id = "send";
   }
-  button.innerHTML = "Send";
+  button.innerHTML = action;
   button.onclick = do_send(message);
   result.appendChild(button);
 }
 
 function do_send(message) {
-  return async () => {
-    const send_button = document.getElementById("send");
-    send_button.disabled = true;
-    send_button.innerHTML = "Sent";
-    const result = document.getElementById("result");
-    const pre = document.createElement("pre");
-    pre.id = "status";
-    const copy_button = document.createElement("button");
-    copy_button.id = "copy";
-    copy_button.innerHTML = "Copy";
-    copy_button.style.display = "none";
-    copy_button.onclick = () => {
-      const txt = document.createElement("textarea");
-      txt.value = pre.innerText;
-      txt.setAttribute("readonly", "");
-      txt.style = { position: "absolute", left: "-9999px" };
-      result.appendChild(txt);
-      txt.select();
-      document.execCommand("copy");
-      result.removeChild(txt);
+  if (
+    message.content &&
+    message.content == message.content + "" &&
+    message.content.startsWith("http")
+  ) {
+    return () => {
+      window.location.href = message.content;
     };
-    result.appendChild(pre);
-    result.appendChild(copy_button);
-    const update_status = (reply, replied) => {
-      var quote = (s) => s;
-      if (replied) {
-        copy_button.style.display = "block";
-      } else {
-        quote = (s) => "Waiting for response: " + s;
-      }
-      let text = typeof reply == "string" ? reply : stringify(reply, null, 2);
-      pre.innerText = quote(text);
+  } else {
+    return async () => {
+      const send_button = document.getElementById("send");
+      send_button.disabled = true;
+      send_button.innerHTML = "Sent";
+      const result = document.getElementById("result");
+      const pre = document.createElement("pre");
+      pre.id = "status";
+      const copy_button = document.createElement("button");
+      copy_button.id = "copy";
+      copy_button.innerHTML = "Copy";
+      copy_button.style.display = "none";
+      copy_button.onclick = () => {
+        const txt = document.createElement("textarea");
+        txt.value = pre.innerText;
+        txt.setAttribute("readonly", "");
+        txt.style = { position: "absolute", left: "-9999px" };
+        result.appendChild(txt);
+        txt.select();
+        document.execCommand("copy");
+        result.removeChild(txt);
+      };
+      result.appendChild(pre);
+      result.appendChild(copy_button);
+      const update_status = (reply, replied) => {
+        var quote = (s) => s;
+        if (replied) {
+          copy_button.style.display = "block";
+        } else {
+          quote = (s) => "Waiting for response: " + s;
+        }
+        let text = typeof reply == "string" ? reply : stringify(reply, null, 2);
+        pre.innerText = quote(text);
+      };
+      await send_message(message, update_status, sleep);
     };
-    await send_message(message, update_status, sleep);
-  };
+  }
 }
 
 function sleep(ms) {
